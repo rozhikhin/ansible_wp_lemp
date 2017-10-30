@@ -1,0 +1,42 @@
+---
+
+- name: Copy the NGINX repository definition
+  copy: src=nginx.repo dest=/etc/yum.repos.d/
+
+- name: Create the GPG key for NGINX
+  copy: src=RPM-GPG-KEY-NGINX dest=/etc/pki/rpm-gpg
+
+
+- name: Install nginx
+  yum: name=nginx state=present
+
+- name: http service state
+  service: name=nginx state=started enabled=yes
+
+#- name: сreate directory for default host
+#  file:
+#    path=/var/www/{{ default_server_hostname }}
+#    mode=0755
+#    owner=nginx
+#    group=nginx
+#    state=directory
+
+#- name: Copy nginx default configuration for wordpress
+#  template: src=default.conf dest=/etc/nginx/conf.d/default.conf
+#  notify: restart nginx
+
+- name: сreate directory for virtual host
+  file:
+    path: /var/www/{{ client_site_name }}
+    mode: 0755
+    owner: nginx
+    group: nginx
+    state: directory
+
+- name: Copy nginx virtual hosts configuration for wordpress
+  template: src=vhost.conf  dest=/etc/nginx/conf.d/{{ client_site_name }}.conf
+  notify: restart nginx
+
+#- name: Copy index.html to  virtual hosts root directory
+#  template: src=index.html dest=/var/www/{{ client_site_name }}/index.html
+  

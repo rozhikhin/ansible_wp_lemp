@@ -1,0 +1,24 @@
+---
+# Path to ssh key
+ssh_key_path: /home/alex/.ssh/my_site_rsa.pub
+# New ssh port
+# Variables for  NGINX
+vhosts_path: '/var/www'
+nginx_port: 80
+#
+
+client_name: my_site_ru
+client_site_name: my-site.ru
+client_user_name: my_site_ru
+client_dbuser_name: my_site_ru
+client_dbname: my_site_ru
+
+mysql_root_file:  '/home/alex/projects/mysql_root'
+mysql_root_password: "{{ lookup('file', mysql_root_file ) }}"
+wp_version: '4.8.2'
+
+ignoreip_fail2ban: 127.0.0.1/8 192.168.0.100 192.168.0.101
+
+
+
+

@@ -1,0 +1,10 @@
+---
+- hosts: webservers
+  roles:
+        - common
+        - nginx
+        - mariadb
+        - php-fpm
+        - wordpress
+        - fail2ban
+  become: yes

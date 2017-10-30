@@ -1,0 +1,67 @@
+---
+
+- name: install fail2ban
+  yum: 
+        name: fail2ban
+        state: present
+
+- name: Create directory mu_plugin for Wordpress
+  file:
+        path: "{{ vhosts_path }}/{{ client_site_name }}/wp-content/mu-plugins/"
+        state: directory
+        owner: nginx
+        group: nginx
+        mode: 0755
+
+- name: enable and start fail2ban
+  systemd:
+    name: fail2ban
+    state: started
+    enabled: True
+
+
+- name: Add plugin for file2ban in Wordpress mu_plugins
+  template:
+        src: security.php
+        dest: "{{ vhosts_path }}/{{ client_site_name }}/wp-content/mu-plugins/"
+
+- name: Define a new filter in /etc/fail2ban/filter.d and call it wordpress-auth.conf
+  template:
+        src: wordpress-auth.conf
+        dest: /etc/fail2ban/filter.d/
+
+#- name: for Wordpress - create a jail for bruteforce script. Append the code to the end of /etc/fail2ban/jail.conf
+#  blockinfile:
+#        path: /etc/fail2ban/jail.conf
+#        block: |
+#                [wordpress]
+#                enabled  = true
+#                port     = http,https
+#                filter   = wordpress-auth
+#                logpath  = /var/log/nginx/access.log
+#                maxretry = 3
+#                bantime  = 3600
+#  notify: restart fail2ban
+
+#- name: for SSH - create a jail for bruteforce script. Append the code to the end of /etc/fail2ban/jail.conf
+#  blockinfile:
+#        path: /etc/fail2ban/jail.conf
+#        block: |
+#                [sshd]
+#                enabled  = true
+#                filter   = sshd
+#                logpath  = /var/log/auth.log
+#                maxretry = 3
+#                bantime  = 3600
+#  notify: restart fail2ban
+
+- name: Rename default jail.conf
+  command: mv /etc/fail2ban/jail.conf /etc/fail2ban/jail.local creates=/etc/fail2ban/jail.local
+
+- name: Copy jail configuration
+  template: 
+        src: jail.conf
+        dest: /etc/fail2ban/jail.conf
+  notify: restart fail2ban
+
+

@@ -1,0 +1,93 @@
+---
+- name: Set ansible hostname
+  hostname:
+        name: "{{ inventory_hostname }}"
+
+- name: Set authorized key took from file
+  authorized_key:
+        user: "{{ item }}"
+        state: present
+        key: "{{ lookup('file', ssh_key_path) }}"
+  with_items:
+        - root
+#        - alex
+
+- name: Add nameserver to resolv.conf
+  lineinfile:
+    path: /etc/resolv.conf
+    line: 'nameserver 8.8.8.8'
+
+- name: upgrade all packages
+  yum: 
+    name: '*'
+    state: latest
+
+- name: install packages
+  yum: 
+        name: "{{ item }}"
+        state: present
+  with_items:
+        - mc
+        - libselinux-python
+        - policycoreutils
+        - policycoreutils-python
+        - selinux-policy
+        - selinux-policy-targeted
+        - libselinux-utils
+        - setools
+        - setools-console
+        - firewalld
+#        - fail2ban
+#        - expect
+
+- name: set selinux policy
+  selinux:
+        policy: targeted
+        state: enforcing
+  register: sepolicy
+        
+- name: reboot system after set selinux policy
+  shell: sleep 2 && shutdown -r now "Ansible package updates triggered"
+  async: 1
+  poll: 0
+  ignore_errors: true
+  when: sepolicy.changed
+  register: reboot
+
+- name: wait for the server to restart 
+  wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 22
+        state: started 
+        delay: 10 
+        timeout: 300
+  become: false
+  connection: local
+  when: reboot.changed
+
+- name: Stop and disable iptables
+  systemd:
+        name: iptables
+        state: stopped
+        enabled: no
+  ignore_errors: yes
+
+- name: Start and enable firewalld
+  systemd:
+        name: firewalld
+        state: started
+        enabled: yes
+
+- name: Add rule for hhtp
+  firewalld:
+    service: http
+    permanent: true
+    state: enabled
+
+- name: Add rule for https
+  firewalld:
+    service: https
+    permanent: true
+    state: enabled
+  notify: Restart firewalld
+

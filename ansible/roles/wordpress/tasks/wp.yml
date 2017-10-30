@@ -1,0 +1,66 @@
+---
+- name: Unarchive a file that needs to be downloaded (added in 2.0)
+  unarchive:
+    src: http://wordpress.org/wordpress-{{ wp_version }}.tar.gz
+    dest: "{{ vhosts_path }}"
+    remote_src: yes
+  
+- name: Copy files from wordoress distrib to target 
+#  copy: 
+#        remote_src: yes
+#        src:  "{{ vhosts_path }}/wordpress/"
+#        dest:  "{{ vhosts_path }}/{{ item.site }}/"
+  command: cp -r "{{ vhosts_path }}/wordpress/." "{{ vhosts_path }}/{{ client_site_name }}/"
+
+- name: Remove  distrib files Wordpress
+  file:
+        path: "{{ vhosts_path }}/wordpress/" 
+        state: absent 
+
+- name: Fetch random salts for WordPress config
+  local_action: command curl https://api.wordpress.org/secret-key/1.1/salt/
+  register: "wp_salt"
+  become: no
+
+- name: Copy WordPress config file
+  template: 
+        src: wp-config.php 
+        dest: "{{ vhosts_path }}/{{ client_site_name }}/"
+
+- name: Change ownership of WordPress installation
+  file: 
+        path: "{{ vhosts_path }}/{{ client_site_name }}/"
+        owner: nginx 
+        group: nginx
+        state: directory 
+        recurse: yes
+
+- name: install SEManage
+  yum: 
+        name: policycoreutils-python 
+        state: present
+
+- name: set the SELinux policy for the Wordpress directory
+  command: semanage fcontext -a -t httpd_sys_content_t "{{ vhosts_path }}/{{ client_site_name }}(/.*)?"
+
+- name: set the SELinux policy for wp-config.php
+  command: semanage fcontext -a -t httpd_sys_script_exec_t "{{ vhosts_path }}/{{ client_site_name }}/wp-config\.php"
+
+- name: set the SELinux policy for wp-content directory
+  command: semanage fcontext -a -t httpd_sys_rw_content_t "{{ vhosts_path }}/{{ client_site_name }}/wp-content(/.*)?"
+
+- name: set the SELinux policy for the *.php files
+  command: semanage fcontext -a -t httpd_sys_script_exec_t "{{ vhosts_path }}/{{ client_site_name }}/.*\.php"
+
+- name: set the SELinux policy for the Upgrade directory
+  command: semanage fcontext -a -t httpd_sys_rw_content_t "{{ vhosts_path }}/{{ client_site_name }}/wp-content/upgrade(/.*)?"
+
+- name: set the SELinux policy for the Uploads directory
+  command: semanage fcontext -a -t httpd_sys_rw_content_t "{{ vhosts_path }}/{{ client_site_name }}/wp-content/uploads(/.*)?"
+
+- name: set the SELinux policy for the wp-includes php files
+  command: semanage fcontext -a -t httpd_sys_script_exec_t "{{ vhosts_path }}/{{ client_site_name }}/wp-includes/.*\.php"
+
+- name: set the SELinux on all the Files
+  command: restorecon -Rv "{{ vhosts_path }}/{{ client_site_name }}"
+

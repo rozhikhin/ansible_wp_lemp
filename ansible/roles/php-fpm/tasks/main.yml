@@ -1,0 +1,62 @@
+---
+- name: Copy the EPEL repository definition
+  copy: src=epel.repo dest=/etc/yum.repos.d/
+
+#- name: Copy the REMI repository definition
+#  copy: src=remi-php71.repo dest=/etc/yum.repos.d 
+
+- name: Create the GPG key for EPEL
+  copy: src=RPM-GPG-KEY-EPEL-7 dest=/etc/pki/rpm-gpg
+
+- name: Create the GPG key for REMI
+  copy: src=RPM-GPG-KEY-remi dest=/etc/pki/rpm-gpg
+  
+- name: Install remi repository
+  yum: 
+        name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+        state: present
+
+- name: Install php-fpm and deps
+  yum: 
+        name: "{{ item }}"
+        state: present
+        enablerepo: remi-php71
+  with_items:
+        - php
+        - php-devel
+        - php-fpm
+        - php-gd
+        - php-mbstring
+        - php-mcrypt
+        - php-mysql
+        - php-opcache
+        - php-xml
+        - php-xmlrpc
+        - php-zip
+        - curl
+        - php-curl
+
+- name: Ensure php5-fpm cgi.fix_pathinfo=0
+  lineinfile: dest=/etc/php.ini regexp='^(.*)cgi.fix_pathinfo=' line=cgi.fix_pathinfo=0
+  notify:
+        - restart php-fpm
+        - restart nginx
+
+- name: Disable default pool
+  command: mv /etc/php-fpm.d/www.conf /etc/php-fpm.d/www.disabled creates=/etc/php-fpm.d/www.disabled
+#  notify: restart php-fpm
+
+#- name: Add user in system
+#  user: name={{ item.user }}  shell=/sbin/nologin createhome=no
+#  with_items:
+#        - "{{ clients }}"
+
+- name: Copy php-fpm configuration
+  template: src=wordpress.conf dest=/etc/php-fpm.d/{{ client_name }}.conf
+#  notify: restart php-fpm
+ 
+- name: enable and start php-fpm
+  systemd:
+    name: php-fpm
+    state: started
+    enabled: True

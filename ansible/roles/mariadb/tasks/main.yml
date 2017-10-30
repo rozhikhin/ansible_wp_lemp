@@ -1,0 +1,74 @@
+---
+- name: Copy the MariaDB  repository definition
+  copy: src=MariaDB.repo dest=/etc/yum.repos.d/
+
+- name: Create the GPG key for MariaDB
+  copy: src=RPM-GPG-KEY-MariaDB dest=/etc/pki/rpm-gpg
+
+- name: Install MariaDB package
+  yum: name={{ item }} state=installed
+  with_items:
+   - MariaDB-server
+   - MariaDB-client
+   - MySQL-python
+   - libselinux-python
+   - libsemanage-python
+
+# - name: Configure SELinux to start mysql on any port
+#  seboolean: name=mysql_connect_any state=true persistent=yes
+
+- name: Start MariaDB Service
+  service: name=mariadb state=started enabled=yes
+
+- name: Set a new root password
+  mysql_user: 
+         check_implicit_admin: yes
+         login_user: root
+         login_password: "{{ mysql_root_password }}"
+         name: root
+         password: "{{ mysql_root_password }}"
+ #        host: "{{ item }}"
+         host_all: yes
+         priv: '*.*:ALL,GRANT'
+         state: present
+ # with_items:
+ #     - localhost
+ #     - 127.0.0.1
+ #     - ::1
+ #     - "{{ ansible_hostname }}"
+  notify:
+      - restart_mariadb
+
+- name: delete anonimous users
+  mysql_user:
+        login_user: root
+        login_password:  "{{ mysql_root_password }}"
+        name: ""
+        host_all: yes
+        state: absent
+  notify:
+        - restart_mariadb
+
+- name: delete test database
+  mysql_db: 
+        name: test
+        login_user: root
+        login_password:  "{{ mysql_root_password }}"
+        state: absent
+
+- name:  create users database
+  mysql_db: 
+        name: "{{ client_dbname }}"
+        login_user: root
+        login_password:  "{{ mysql_root_password }}"
+        state: present
+
+- name: create a mysql user with a random password using many different char sets
+  mysql_user:
+        login_user: root
+        login_password:  "{{ mysql_root_password }}"
+        name: "{{ client_dbuser_name }}"
+        password: "{{ lookup('password', '/tmp/{{ client_name }}  chars=ascii_letters,digits,hexdigits,punctuation length=10') }}"
+        priv: "{{ client_dbname }}.*:ALL"
+        state: present
+
