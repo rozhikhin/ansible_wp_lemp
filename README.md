@@ -31,13 +31,17 @@ Works only with RedHat and Centos
 
 Playbook handle the following roles:
 
+[Common](ansible/roles/common/README.md) - general tasks for setting up the system
 
+Nginx - 
 
+PHP-FPM - 
 
+MariaDB -
 
+Wordpress - 
 
-
-
+Fail2ban - 
 
 
 
