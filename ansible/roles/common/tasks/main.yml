@@ -17,12 +17,12 @@
     path: /etc/resolv.conf
     line: 'nameserver 8.8.8.8'
 
-- name: upgrade all packages
+- name: Upgrade all packages
   yum: 
     name: '*'
     state: latest
 
-- name: install packages
+- name: Install packages
   yum: 
         name: "{{ item }}"
         state: present
@@ -40,13 +40,13 @@
 #        - fail2ban
 #        - expect
 
-- name: set selinux policy
+- name: Set selinux policy
   selinux:
         policy: targeted
         state: enforcing
   register: sepolicy
         
-- name: reboot system after set selinux policy
+- name: Reboot system after set selinux policy
   shell: sleep 2 && shutdown -r now "Ansible package updates triggered"
   async: 1
   poll: 0
@@ -54,7 +54,7 @@
   when: sepolicy.changed
   register: reboot
 
-- name: wait for the server to restart 
+- name: Wait for the server to restart 
   wait_for:
         host: "{{ inventory_hostname }}"
         port: 22
