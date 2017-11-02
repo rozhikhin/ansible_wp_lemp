@@ -9,13 +9,13 @@
 
 Nginx - установка и настройка WEB-сервера NGINX, создание конфигурационных файлов и каталогов для сайта
 
-PHP-FPM - установка и настройка PHP-FPM  и необходимых пакетов, создание конфигурационных файлов
+PHP-FPM - установка необходимых пакетов и настройка PHP-FPM, создание конфигурационных файлов
 
 MariaDB - установка и настройка сервера баз данных, установка пароля root-у, создание необходимых баз данных 
 и  пользователей
 
-Wordpress - скачивание и распаковка дистрибутива Wordpress, создание файла конфигурации Wordpress, настройка разрешений
-SELinux для Wordpress
+Wordpress - скачивание и распаковка дистрибутива Wordpress, создание файла конфигурации Wordpress, 
+настройка разрешений SELinux для Wordpress
 
 Fail2ban - настройка утилиты для защиты доступа в админку Wordpress и к серверу по SSH
  
@@ -33,15 +33,18 @@ Playbook handle the following roles:
 
 [Common](ansible/roles/common/README.md) - general tasks for setting up the system
 
-Nginx - 
+Nginx - installation and configuration of WEB-server NGINX, creation of configuration files and directories
 
-PHP-FPM - 
+PHP-FPM - installation of packages and configuration of PHP-FPM, creation of configuration files
 
-MariaDB -
+MariaDB - installing and configuring the database server, setting the root password, 
+creating the necessary databases and users
 
-Wordpress - 
+Wordpress - downloading and unpacking Wordpress distribution, creation of Wordpress configuration file, setting 
+the SELinux permissions for Wordpress
 
-Fail2ban - 
+Fail2ban - setting up a utility to protect access to the Wordpress admin area and to the server via SSH
+
 
 
 
