@@ -1,18 +1,20 @@
 ---
 #Common variables for Ansible
-#
+#If site in develop then true. If in production - false
+develop: true
 # Path to ssh key
 ssh_key_path: /home/alex/.ssh/my_site_rsa.pub
 # Variables for  NGINX
 vhosts_path: '/var/www'
 nginx_port: 80
+www_user: vagrant # Only for develop with Vagrant - In order for the synced_folder to function correctly
 #
 # Variables for site 
-client_name: my_site_ru
-client_site_name: my-site.ru
-client_user_name: my_site_ru
-client_dbuser_name: my_site_ru
-client_dbname: my_site_ru
+client_name: dev_local
+client_site_name: dev.local
+client_user_name: dev_local
+client_dbuser_name: dev_local
+client_dbname: dev_local
 # Variables for MariaDB
 mysql_root_file:  '/home/alex/projects/mysql_root'
 mysql_root_password: "{{ lookup('file', mysql_root_file ) }}"
