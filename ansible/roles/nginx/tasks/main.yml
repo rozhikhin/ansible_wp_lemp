@@ -15,10 +15,10 @@
 
 #- name: сreate directory for default host
 #  file:
-#    path=/var/www/{{ default_server_hostname }}
-#    mode=0755
-#    owner=nginx
-#    group=nginx
+#    path: /var/www/{{ default_server_hostname }}
+#    mode: 0755
+#    owner: "{{ www_user }}"
+#    group: "{{ www_user }}"
 #    state=directory
 
 #- name: Copy nginx default configuration for wordpress
@@ -29,9 +29,13 @@
   file:
     path: /var/www/{{ client_site_name }}
     mode: 0755
-    owner: nginx
-    group: nginx
+    owner: "{{ www_user }}"
+    group: "{{ www_user }}"
     state: directory
+
+- name: Copy nginx main configuration file
+  template: src=nginx.conf  dest=/etc/nginx/nginx.conf
+  notify: restart nginx
 
 - name: Copy nginx virtual hosts configuration for wordpress
   template: src=vhost.conf  dest=/etc/nginx/conf.d/{{ client_site_name }}.conf
