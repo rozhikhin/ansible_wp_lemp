@@ -52,7 +52,7 @@ ansible-playbook wplemp.yml
 Works only with RedHat and Centos.
 
 In the `group_vars` directory there is a file with common variables.
-In develop variable indicates whether or not this setting is used for the development or production.
+In `develop` variable indicates whether or not this setting is used for the development or production.
 If `develop: true` - development, if` develop: false` - production.
 If you are installing for development, some tasks will not be performed (for example, installing 
 and configuring SELinux and file2ban).
