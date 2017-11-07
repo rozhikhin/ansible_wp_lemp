@@ -1,10 +1,10 @@
-# Роль Common 
+# Роль Wordpress 
 
 Rоль выполняет следующие задачи:
 
 
 
 
-# Role Common
+# Role Wordpress
 
 Role handle the folloving tasks:
